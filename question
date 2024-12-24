@@ -47,3 +47,59 @@ print(f"A matrix shape: {A_matrix.shape}")  # 打印 A 的形状
 print(f"Last predicted_output: {predicted_outputs[0]}")  
 print(f"Last true output_tensor: {true_outputs[0]}")  
 print(f"Last A: {A_matrix[0]}") 
+
+
+
+
+# Step 1: Flatten the predicted and true outputs to shape (64, 400)
+predicted_outputs_flat = predicted_outputs.reshape(64, -1)  # 将预测结果展平为 (64, 400)
+true_outputs_flat = true_outputs.reshape(64, -1)  # 将真实结果展平为 (64, 400)
+
+# Step 2: 计算 MAPE, RMSE 和 R²
+
+# 计算 MAPE
+def calculate_mape(true, predicted):
+    # 防止除零错误，取真值不为零的部分
+    return np.mean(np.abs((true - predicted) / true)) * 100
+
+# 计算 RMSE
+def calculate_rmse(true, predicted):
+    return np.sqrt(np.mean((true - predicted) ** 2))
+
+# 计算 R²
+def calculate_r2(true, predicted):
+    ss_tot = np.sum((true - np.mean(true)) ** 2)
+    ss_res = np.sum((true - predicted) ** 2)
+    return 1 - (ss_res / ss_tot)
+
+# 计算每个样本的 MAPE、RMSE 和 R²
+mape_values = []
+rmse_values = []
+r2_values = []
+
+for i in range(predicted_outputs_flat.shape[0]):
+    true = true_outputs_flat[i]
+    predicted = predicted_outputs_flat[i]
+    
+    mape = calculate_mape(true, predicted)
+    rmse = calculate_rmse(true, predicted)
+    r2 = calculate_r2(true, predicted)
+    
+    mape_values.append(mape)
+    rmse_values.append(rmse)
+    r2_values.append(r2)
+
+# 转换为 NumPy 数组
+mape_values = np.array(mape_values)
+rmse_values = np.array(rmse_values)
+r2_values = np.array(r2_values)
+
+# Step 3: 打印输出
+print(f"MAPE values for each sample: {mape_values}")
+print(f"RMSE values for each sample: {rmse_values}")
+print(f"R2 values for each sample: {r2_values}")
+
+# 计算并输出均值
+print(f"Mean MAPE: {np.mean(mape_values)}")
+print(f"Mean RMSE: {np.mean(rmse_values)}")
+print(f"Mean R2: {np.mean(r2_values)}")
